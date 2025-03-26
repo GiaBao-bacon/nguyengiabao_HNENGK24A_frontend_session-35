@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Ứng dụng Bookmark</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      margin: 0;
+      padding: 20px;
+    }
+
+    #add-bookmark-form {
+      background-color: #f9f9f9;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+      padding: 20px;
+      margin-bottom: 20px;
+    }
+
+    #add-bookmark-form h2 {
+      margin-top: 0;
+    }
+
+    #add-bookmark-form label {
+      display: block;
+      margin-bottom: 5px;
+    }
+
+    #add-bookmark-form input[type="text"] {
+      width: calc(100% - 12px);
+      padding: 5px;
+      margin-bottom: 10px;
+      border: 1px solid #ccc;
+      border-radius: 3px;
+    }
+
+    #add-bookmark-form button {
+      background-color: #4CAF50;
+      color: white;
+      padding: 10px 15px;
+      border: none;
+      border-radius: 3px;
+      cursor: pointer;
+    }
+
+    #add-bookmark-form button:hover {
+      background-color: #3e8e41;
+    }
+
+    #bookmarks-list {
+      border: 1px solid #ccc;
+      padding: 20px;
+    }
+
+    #bookmarks li {
+      margin-bottom: 10px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Ứng dụng Bookmark</h1>
+
+  <div id="add-bookmark-form">
+    <h2>Add Bookmark</h2>
+    <label for="website-name">Website Name:</label>
+    <input type="text" id="website-name" /><br><br>
+    <label for="website-url">Website URL:</label>
+    <input type="text" id="website-url" /><br><br>
+    <button id="add-button">Save</button>
+  </div>
+
+  <div id="bookmarks-list">
+    <h2>Danh Sách Bookmark</h2>
+    <ul id="bookmarks"></ul>
+  </div>
+
+  <script>
+    let bookmarks = [];
+
+    function saveBookmarks() {
+      localStorage.setItem("bookmarks", JSON.stringify(bookmarks));
+    }
+
+    function loadBookmarks() {
+      const storedBookmarks = localStorage.getItem("bookmarks");
+      if (storedBookmarks) {
+        bookmarks = JSON.parse(storedBookmarks);
+      }
+    }
+
+    function displayBookmarks() {
+      const bookmarksList = document.getElementById("bookmarks");
+      bookmarksList.innerHTML = "";
+
+      bookmarks.forEach((bookmark, index) => {
+        const listItem = document.createElement("li");
+        listItem.innerHTML = `<a href="${bookmark.url}" target="_blank">${bookmark.name}</a> <button class="delete-button" data-index="${index}">Xóa</button>`;
+        bookmarksList.appendChild(listItem);
+      });
+
+      const deleteButtons = document.querySelectorAll(".delete-button");
+      deleteButtons.forEach(button => {
+        button.addEventListener("click", function() {
+          const index = parseInt(this.getAttribute("data-index"));
+          deleteBookmark(index);
+        });
+      });
+    }
+
+    function addBookmark(name, url) {
+      bookmarks.push({ name: name, url: url });
+      saveBookmarks();
+      displayBookmarks();
+    }
+
+    function deleteBookmark(index) {
+      bookmarks.splice(index, 1);
+      saveBookmarks();
+      displayBookmarks();
+    }
+
+    loadBookmarks();
+    displayBookmarks();
+
+    const addButton = document.getElementById("add-button");
+    addButton.addEventListener("click", function() {
+      const websiteName = document.getElementById("website-name").value;
+      const websiteUrl = document.getElementById("website-url").value;
+
+      if (websiteName && websiteUrl) {
+        addBookmark(websiteName, websiteUrl);
+        document.getElementById("website-name").value = "";
+        document.getElementById("website-url").value = "";
+      } else {
+        alert("Vui lòng nhập đầy đủ tên website và URL.");
+      }
+    });
+  </script>
+</body>
+</html>
