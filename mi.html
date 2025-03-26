@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>To-Do List K24</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      margin: 0;
+      padding: 20px;
+      text-align: center;
+    }
+
+    #todo-list {
+      width: 400px;
+      margin: 20px auto;
+      border: 1px solid #ccc;
+      padding: 20px;
+      border-radius: 5px;
+    }
+
+    #todo-list h2 {
+      margin-top: 0;
+    }
+
+    #todo-list input[type="text"] {
+      width: 250px;
+      padding: 5px;
+      margin-right: 10px;
+      border: 1px solid #ccc;
+      border-radius: 3px;
+    }
+
+    #todo-list button {
+      padding: 5px 10px;
+      border: none;
+      border-radius: 3px;
+      cursor: pointer;
+    }
+
+    #todo-list button#add-button {
+      background-color: #4CAF50;
+      color: white;
+    }
+
+    #todo-list button#add-button:hover {
+      background-color: #3e8e41;
+    }
+
+    #todo-list ul {
+      list-style-type: none;
+      padding: 0;
+    }
+
+    #todo-list li {
+      margin-bottom: 10px;
+    }
+
+    #todo-list li span {
+      margin-right: 10px;
+    }
+
+    #todo-list li button {
+      padding: 3px 8px;
+    }
+
+    #todo-list li button.edit-button {
+      background-color: #008CBA;
+      color: white;
+    }
+
+    #todo-list li button.edit-button:hover {
+      background-color: #0077A3;
+    }
+
+    #todo-list li button.delete-button {
+      background-color: #f44336;
+      color: white;
+    }
+
+    #todo-list li button.delete-button:hover {
+      background-color: #d32f2f;
+    }
+  </style>
+</head>
+<body>
+  <div id="todo-list">
+    <h2>To-Do List K24</h2>
+
+    <input type="text" id="task-input" placeholder="Nhập công việc">
+    <button id="add-button">Thêm</button>
+
+    <ul id="task-list"></ul>
+  </div>
+
+  <script>
+    const taskInput = document.getElementById("task-input");
+    const addButton = document.getElementById("add-button");
+    const taskList = document.getElementById("task-list");
+
+    let tasks = JSON.parse(localStorage.getItem("tasks")) || [];
+
+    function saveTasks() {
+      localStorage.setItem("tasks", JSON.stringify(tasks));
+    }
+
+    function renderTasks() {
+      taskList.innerHTML = "";
+      tasks.forEach((task, index) => {
+        const listItem = document.createElement("li");
+        listItem.innerHTML = `
+          <span>${task}</span>
+          <button class="edit-button" data-index="${index}">Sửa</button>
+          <button class="delete-button" data-index="${index}">Xóa</button>
+        `;
+        taskList.appendChild(listItem);
+      });
+      saveTasks();
+    }
+
+    function addTask() {
+      const task = taskInput.value.trim();
+      if (task) {
+        tasks.push(task);
+        renderTasks();
+        taskInput.value = "";
+      }
+    }
+
+    function editTask(index) {
+      const newTask = prompt("Sửa công việc:", tasks[index]);
+      if (newTask !== null) {
+        tasks[index] = newTask.trim();
+        renderTasks();
+      }
+    }
+
+    function deleteTask(index) {
+      tasks.splice(index, 1);
+      renderTasks();
+    }
+
+    addButton.addEventListener("click", addTask);
+
+    taskList.addEventListener("click", (event) => {
+      if (event.target.classList.contains("edit-button")) {
+        editTask(parseInt(event.target.dataset.index));
+      } else if (event.target.classList.contains("delete-button")) {
+        deleteTask(parseInt(event.target.dataset.index));
+      }
+    });
+
+    renderTasks();
+  </script>
+</body>
+</html>
