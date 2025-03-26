@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Danh sách nhân viên Rikkei</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      margin: 0;
+      padding: 20px;
+    }
+
+    #employee-list {
+      width: 600px;
+      margin: 20px auto;
+      border: 1px solid #ccc;
+      padding: 20px;
+      border-radius: 5px;
+    }
+
+    #employee-list h2 {
+      margin-top: 0;
+    }
+
+    #employee-list input[type="text"] {
+      width: 200px;
+      padding: 5px;
+      margin-right: 10px;
+      border: 1px solid #ccc;
+      border-radius: 3px;
+    }
+
+    #employee-list button {
+      padding: 5px 10px;
+      border: none;
+      border-radius: 3px;
+      cursor: pointer;
+    }
+
+    #employee-list button#add-button {
+      background-color: #4CAF50;
+      color: white;
+    }
+
+    #employee-list button#add-button:hover {
+      background-color: #3e8e41;
+    }
+
+    #employee-list table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+    }
+
+    #employee-list th, #employee-list td {
+      border: 1px solid #ddd;
+      padding: 8px;
+      text-align: left;
+    }
+
+    #employee-list th {
+      background-color: #f2f2f2;
+    }
+
+    #pagination {
+      margin-top: 20px;
+      text-align: center;
+    }
+
+    #pagination button {
+      padding: 5px 10px;
+      margin: 0 5px;
+      cursor: pointer;
+    }
+
+    #pagination button.page-number {
+      background-color: #f2f2f2;
+    }
+
+    #pagination button.page-number.active {
+      background-color: #4CAF50;
+      color: white;
+    }
+  </style>
+</head>
+<body>
+  <div id="employee-list">
+    <h2>Danh sách nhân viên Rikkei</h2>
+
+    <input type="text" id="name-input" placeholder="Tên nhân viên">
+    <input type="text" id="position-input" placeholder="Chức vụ">
+    <button id="add-button">Thêm nhân viên</button>
+
+    <table>
+      <thead>
+        <tr>
+          <th>STT</th>
+          <th>Tên</th>
+          <th>Chức vụ</th>
+        </tr>
+      </thead>
+      <tbody id="employee-table-body"></tbody>
+    </table>
+
+    <div id="pagination">
+      <button id="prev-button">Previous</button>
+      <span id="page-numbers"></span>
+      <button id="next-button">Next</button>
+    </div>
+  </div>
+
+  <script>
+    const nameInput = document.getElementById("name-input");
+    const positionInput = document.getElementById("position-input");
+    const addButton = document.getElementById("add-button");
+    const employeeTableBody = document.getElementById("employee-table-body");
+    const pageNumbers = document.getElementById("page-numbers");
+    const prevButton = document.getElementById("prev-button");
+    const nextButton = document.getElementById("next-button");
+
+    let employees = JSON.parse(localStorage.getItem("employees")) || [];
+    let currentPage = 1;
+    const employeesPerPage = 3;
+
+    function saveEmployees() {
+      localStorage.setItem("employees", JSON.stringify(employees));
+    }
+
+    function renderEmployees() {
+      const startIndex = (currentPage - 1) * employeesPerPage;
+      const endIndex = startIndex + employeesPerPage;
+      const currentPageEmployees = employees.slice(startIndex, endIndex);
+
+      employeeTableBody.innerHTML = "";
+      currentPageEmployees.forEach((employee, index) => {
+        const listItem = document.createElement("tr");
+        listItem.innerHTML = `
+          <td>${startIndex + index + 1}</td>
+          <td>${employee.name}</td>
+          <td>${employee.position}</td>
+        `;
+        employeeTableBody.appendChild(listItem);
+      });
+      saveEmployees();
+      renderPagination();
+    }
+
+    function renderPagination() {
+      const totalPages = Math.ceil(employees.length / employeesPerPage);
+      let pageNumberHtml = "";
+      for (let i = 1; i <= totalPages; i++) {
+        const activeClass = i === currentPage ? "active" : "";
+        pageNumberHtml += `<button class="page-number ${activeClass}" data-page="${i}">${i}</button>`;
+      }
+      pageNumbers.innerHTML = pageNumberHtml;
+
+      const pageNumberButtons = document.querySelectorAll(".page-number");
+      pageNumberButtons.forEach(button => {
+        button.addEventListener("click", function() {
+          currentPage = parseInt(this.dataset.page);
+          renderEmployees();
+        });
+      });
+
+      prevButton.disabled = currentPage === 1;
+      nextButton.disabled = currentPage === totalPages;
+    }
+
+    function addEmployee() {
+      const name = nameInput.value.trim();
+      const position = positionInput.value.trim();
+      if (name && position) {
+        employees.push({ name: name, position: position });
+        renderEmployees();
+        nameInput.value = "";
+        positionInput.value = "";
+      }
+    }
+
+    addButton.addEventListener("click", addEmployee);
+
+    prevButton.addEventListener("click", () => {
+      currentPage--;
+      renderEmployees();
+    });
+
+    nextButton.addEventListener("click", () => {
+      currentPage++;
+      renderEmployees();
+    });
+
+    renderEmployees();
+  </script>
+</body>
+</html>
